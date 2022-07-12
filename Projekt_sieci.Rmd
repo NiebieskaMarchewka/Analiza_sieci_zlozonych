@@ -1,0 +1,140 @@
+---
+title: "Projekt_sieci"
+author: "Marcin Woźniak"
+date: '2022-05-31'
+output: html_document
+---
+
+```{r}
+library(igraph)
+
+graph.strength.distribution <- function (graph, cumulative = F, ...)
+{
+  if (!is.igraph(graph)) {
+    stop("Not a graph object")
+  }
+  # graph.strength() instead of degree()
+  cs <- graph.strength(graph, ...)
+  hi <- hist(cs, 0:max(cs), plot = FALSE)$density
+  if (!cumulative) {
+    res <- hi
+  }
+  else {
+    res <- rev(cumsum(rev(hi)))
+  }
+  res
+}
+```
+
+
+```{r}
+graf <-read_graph("C:/Users/marci/Desktop/Projekt_sieci/nornikiR.graphml", format = "graphml")
+czy_spojny = is.connected(graf)
+gestosc = edge_density(graf)
+sredni_stopien = mean(degree(graf))
+sredni_stopien_wazony = mean(strength(graf))
+maks_stopien_wazony = max(strength(graf))
+min_stopien_wazony = max(strength(graf))
+max_stopien_niewazony = max(degree(graf))
+srednica = diameter(graf)
+stopnie_wazone = strength(graf)
+posrednictwo = betweenness(graf)
+bliskosc = closeness(graf)
+centralnosc_wektora_wlasnego = eigen_centrality(graf)
+pagerank = page_rank(graf)
+ekscentrycznosc = eccentricity(graf)
+```
+
+
+
+Rozkład stopni ważonych wierzchołków:
+---
+```{r}
+
+plot(graph.strength.distribution(graf)*171, type = "h", xlab = "Stopień ważony",
+     ylab = "Ilość wierzchołkow",
+     main = "Rozkład ważonych stopni wierzchołków",
+     lwd = 2)
+
+
+```
+
+wielopoziomowy
+---
+```{r}
+m <- cluster_leiden(graf)
+length(m)
+
+
+
+
+```
+
+
+Szybki zachłanny
+---
+
+```{r}
+s <- cluster_fast_greedy(graf)
+length(s)
+modularity(s)
+sort(sizes(s))
+```
+
+```{r}
+round(compare(m, s, method = "nmi"), 6)
+```
+
+```{r}
+plot_dendrogram(s)
+
+```
+```{r}
+bet <-betweenness(graf)
+hist(bet, breaks =30, main = "Rozkład pośrednictwa", ylab = "Częstość", xlab = "Pośrednictwo")
+hist(bet, breaks =30, main = "Rozkład pośrednictwa", ylab = "Częstość", xlab = "Pośrednictwo",  cex.main = 3, cex.lab = 1.5, cex.axis = 1.5)
+abline(v = quantile(bet, 0.9), lwd = 3, col = "red")
+text(1200, 80, "Kwantyl rzędu 0.9", col = "red", adj = 0, cex = 1.5  )
+```
+
+hist(bet, breaks =30, main = "Rozkład pośrednictwa", ylab = "Częstość", xlab = "Pośrednictwo",  cex.main = 3, cex.lab = 1.5, cex.axis = 1.5)
+abline(v = quantile(bet, 0.9), lwd = 3, col = "red")
+text(1200, 80, "Kwantyl rzędu 0.9", col = "red", adj = 0, cex = 3  )
+```{r}
+eb <- cluster_edge_betweenness(graf)
+length(eb)
+modularity(eb)
+sort(sizes(eb))
+plot_dendrogram(eb)
+```
+```{r}
+im <- cluster_infomap(graf)
+length(im)
+modularity(im)
+sort(sizes(im))
+```
+```{r}
+lp <- cluster_label_prop(graf)
+length(im)
+modularity(lp)
+sort(sizes(lp))
+```
+```{r}
+w <- cluster_walktrap(graf)
+length(w)
+modularity(w)
+sort(sizes(w))
+plot_dendrogram(w)
+```
+
+
+
+
+```{r}
+le <- cluster_leading_eigen(graf)
+length(le)
+modularity(le)
+sort(sizes(le))
+plot_dendrogram(le)
+```
+
